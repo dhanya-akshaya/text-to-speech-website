@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Text to Speech (Indian Languages)</title>
+    <title>Text to Speech</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -18,7 +18,7 @@
         padding: 20px;
         border-radius: 16px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-        width: 420px;
+        width: 400px;
         text-align: center;
       }
       h1 {
@@ -52,40 +52,43 @@
         padding: 6px;
         border-radius: 8px;
         border: 1px solid #ccc;
-        width: 100%;
       }
       p {
         font-size: 13px;
         color: #555;
+      }
+      .byline {
+        margin-top: 15px;
+        font-size: 15px;
+        color: #4c1d95;
+        font-weight: bold;
+      }
+      .heart {
+        color: red;
       }
     </style>
   </head>
   <body>
     <div class="card">
       <h1>Text to Speech</h1>
-      <p>Type your text and choose a language.</p>
+      <p>Type your text and click Speak.</p>
 
-      <textarea
-        id="text"
-        placeholder="Type English / हिंदी / తెలుగు / தமிழ் text here..."
-      ></textarea>
+      <textarea id="text" placeholder="Type something here..."></textarea>
 
-      <!-- Language selection -->
-      <select id="languageSelect">
-        <option value="en-IN">English (India)</option>
-        <option value="hi-IN">Hindi (हिन्दी)</option>
-        <option value="te-IN">Telugu (తెలుగు)</option>
-        <option value="ta-IN">Tamil (தமிழ்)</option>
-      </select>
+      <br />
 
-      <!-- Voice selection (optional) -->
       <select id="voiceSelect">
-        <option value="">Default Voice (recommended)</option>
+        <option value="">Default Voice</option>
       </select>
+
+      <br />
 
       <button id="speakBtn">Speak</button>
 
       <p id="msg"></p>
+
+      <!-- Your name with a heart ❤️ -->
+      <p class="byline">Made with <span class="heart">❤️</span> by Dhanya Akshaya</p>
     </div>
 
     <script>
@@ -93,25 +96,20 @@
       const speakBtn = document.getElementById("speakBtn");
       const msg = document.getElementById("msg");
       const voiceSelect = document.getElementById("voiceSelect");
-      const languageSelect = document.getElementById("languageSelect");
 
       let voices = [];
 
       function loadVoices() {
         voices = window.speechSynthesis.getVoices();
-        voiceSelect.innerHTML =
-          '<option value="">Default Voice (recommended)</option>';
-
-        // List all available voices (user can experiment)
+        voiceSelect.innerHTML = '<option value="">Default Voice</option>';
         voices.forEach((voice, index) => {
           const option = document.createElement("option");
           option.value = index;
-          option.textContent = `${voice.name} (${voice.lang})`;
+          option.textContent = voice.name + " (" + voice.lang + ")";
           voiceSelect.appendChild(option);
         });
       }
 
-      // Some browsers load voices async
       loadVoices();
       window.speechSynthesis.onvoiceschanged = loadVoices;
 
@@ -128,18 +126,21 @@
           return;
         }
 
-        const selectedLang = languageSelect.value || "en-IN";
-
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = selectedLang; // set language (Hindi/Telugu/Tamil)
 
-        const selectedVoiceIndex = voiceSelect.value;
-        if (selectedVoiceIndex !== "") {
-          utterance.voice = voices[selectedVoiceIndex];
+        const selectedIndex = voiceSelect.value;
+        if (selectedIndex !== "") {
+          utterance.voice = voices[selectedIndex];
         }
 
         msg.textContent = "Speaking...";
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utterance);
 
-        utterance.onend
+        utterance.onend = () => {
+          msg.textContent = "Done!";
+        };
+      });
+    </script>
+  </body>
+</html>
