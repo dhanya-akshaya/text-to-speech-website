@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Text to Speech</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #a855f7, #22c55e);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        width: 400px;
+        text-align: center;
+      }
+      h1 {
+        margin-top: 0;
+        color: #4c1d95;
+      }
+      textarea {
+        width: 100%;
+        height: 120px;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        resize: none;
+        font-size: 14px;
+      }
+      button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        background: #4c1d95;
+        color: white;
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      select {
+        margin-top: 10px;
+        padding: 6px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+      p {
+        font-size: 13px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Text to Speech</h1>
+      <p>Type your text and click Speak.</p>
+
+      <textarea id="text" placeholder="Type something here..."></textarea>
+
+      <br />
+
+      <select id="voiceSelect">
+        <option value="">Default Voice</option>
+      </select>
+
+      <br />
+
+      <button id="speakBtn">Speak</button>
+
+      <p id="msg"></p>
+    </div>
+
+    <script>
+      const textArea = document.getElementById("text");
+      const speakBtn = document.getElementById("speakBtn");
+      const msg = document.getElementById("msg");
+      const voiceSelect = document.getElementById("voiceSelect");
+
+      let voices = [];
+
+      function loadVoices() {
+        voices = window.speechSynthesis.getVoices();
+        voiceSelect.innerHTML = '<option value="">Default Voice</option>';
+        voices.forEach((voice, index) => {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = voice.name + " (" + voice.lang + ")";
+          voiceSelect.appendChild(option);
+        });
+      }
+
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+
+      speakBtn.addEventListener("click", () => {
+        const text = textArea.value.trim();
+
+        if (!("speechSynthesis" in window)) {
+          msg.textContent = "Sorry, your browser does not support speech.";
+          return;
+        }
+
+        if (!text) {
+          msg.textContent = "Please type some text.";
+          return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        const selectedIndex = voiceSelect.value;
+        if (selectedIndex !== "") {
+          utterance.voice = voices[selectedIndex];
+        }
+
+        msg.textContent = "Speaking...";
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+
+        utterance.onend = () => {
+          msg.textContent = "Done!";
+        };
+      });
+    </script>
+  </body>
+</html>
