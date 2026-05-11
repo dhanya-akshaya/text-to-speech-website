@@ -160,10 +160,12 @@
         display: flex;
         gap: 12px;
         margin-top: 10px;
+        flex-wrap: wrap;
       }
 
       button {
         flex: 1;
+        min-width: 120px;
         padding: 14px;
         border: none;
         border-radius: 14px;
@@ -178,7 +180,12 @@
         color: white;
       }
 
-      #stopBtn {
+      #pauseBtn {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+
+      #resumeBtn {
         background: rgba(255, 255, 255, 0.15);
         color: white;
       }
@@ -259,7 +266,8 @@
 
       <div class="buttons">
         <button id="speakBtn">Speak</button>
-        <button id="stopBtn">Stop</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resumeBtn">Resume</button>
       </div>
 
       <p id="msg"></p>
@@ -272,13 +280,15 @@
     <script>
       const textArea = document.getElementById("text");
       const speakBtn = document.getElementById("speakBtn");
-      const stopBtn = document.getElementById("stopBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const resumeBtn = document.getElementById("resumeBtn");
       const msg = document.getElementById("msg");
       const voiceSelect = document.getElementById("voiceSelect");
       const speed = document.getElementById("speed");
       const speedValue = document.getElementById("speedValue");
 
       let voices = [];
+      let currentUtterance;
 
       // Load voices
       function loadVoices() {
@@ -301,7 +311,7 @@
 
       speechSynthesis.onvoiceschanged = loadVoices;
 
-      // Speed display
+      // Update speed display
       speed.addEventListener("input", () => {
         speedValue.textContent = speed.value;
       });
@@ -321,30 +331,38 @@
           return;
         }
 
-        const utterance = new SpeechSynthesisUtterance(text);
+        // Stop any previous speech
+        speechSynthesis.cancel();
+
+        currentUtterance = new SpeechSynthesisUtterance(text);
 
         const selectedVoice = voiceSelect.value;
 
         if (selectedVoice !== "") {
-          utterance.voice = voices[selectedVoice];
+          currentUtterance.voice = voices[selectedVoice];
         }
 
-        utterance.rate = speed.value;
+        currentUtterance.rate = speed.value;
 
         msg.textContent = "Speaking...";
 
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
+        speechSynthesis.speak(currentUtterance);
 
-        utterance.onend = () => {
+        currentUtterance.onend = () => {
           msg.textContent = "Finished speaking.";
         };
       });
 
-      // Stop speech
-      stopBtn.addEventListener("click", () => {
-        speechSynthesis.cancel();
-        msg.textContent = "Speech stopped.";
+      // Pause speech
+      pauseBtn.addEventListener("click", () => {
+        speechSynthesis.pause();
+        msg.textContent = "Speech paused.";
+      });
+
+      // Resume speech
+      resumeBtn.addEventListener("click", () => {
+        speechSynthesis.resume();
+        msg.textContent = "Speech resumed.";
       });
     </script>
   </body>
