@@ -2,144 +2,349 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Text to Speech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoiceFlow | Text to Speech</title>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #a855f7, #22c55e);
+        font-family: "Poppins", sans-serif;
         min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 0;
-      }
-      .card {
-        background: white;
+        background: linear-gradient(
+          135deg,
+          #0f172a,
+          #1e293b,
+          #312e81,
+          #7c3aed
+        );
         padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-        width: 400px;
-        text-align: center;
+        overflow: hidden;
       }
+
+      /* Background Glow */
+      body::before,
+      body::after {
+        content: "";
+        position: absolute;
+        width: 350px;
+        height: 350px;
+        border-radius: 50%;
+        filter: blur(90px);
+        z-index: -1;
+      }
+
+      body::before {
+        background: #7c3aed;
+        top: -100px;
+        left: -100px;
+      }
+
+      body::after {
+        background: #06b6d4;
+        bottom: -100px;
+        right: -100px;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 460px;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        color: white;
+        animation: fadeIn 1s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        margin: auto;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #06b6d4, #7c3aed);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 28px;
+        margin-bottom: 18px;
+        box-shadow: 0 0 25px rgba(124, 58, 237, 0.5);
+      }
+
       h1 {
-        margin-top: 0;
-        color: #4c1d95;
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 10px;
       }
+
+      .subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #d1d5db;
+        margin-bottom: 25px;
+      }
+
       textarea {
         width: 100%;
-        height: 120px;
-        padding: 8px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        resize: none;
-        font-size: 14px;
-      }
-      button {
-        margin-top: 10px;
-        padding: 10px 20px;
-        border-radius: 8px;
+        height: 140px;
         border: none;
-        font-size: 16px;
-        cursor: pointer;
-        background: #4c1d95;
+        outline: none;
+        resize: none;
+        border-radius: 16px;
+        padding: 15px;
+        font-size: 15px;
+        font-family: "Poppins", sans-serif;
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        margin-bottom: 18px;
+      }
+
+      textarea::placeholder {
+        color: #d1d5db;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      select,
+      input[type="range"] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+        border: none;
+        outline: none;
+        font-family: "Poppins", sans-serif;
+        background: rgba(255, 255, 255, 0.12);
         color: white;
       }
-      button:hover {
-        opacity: 0.9;
+
+      option {
+        color: black;
       }
-      select {
+
+      .range-box {
+        color: #e5e7eb;
+        font-size: 14px;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 12px;
         margin-top: 10px;
-        padding: 6px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
       }
-      p {
-        font-size: 13px;
-        color: #555;
-      }
-      .byline {
-        margin-top: 15px;
+
+      button {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 14px;
         font-size: 15px;
-        color: #4c1d95;
-        font-weight: bold;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s ease;
       }
+
+      #speakBtn {
+        background: linear-gradient(135deg, #06b6d4, #7c3aed);
+        color: white;
+      }
+
+      #stopBtn {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        opacity: 0.95;
+      }
+
+      #msg {
+        text-align: center;
+        margin-top: 18px;
+        color: #e5e7eb;
+        font-size: 14px;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 14px;
+        color: #d1d5db;
+      }
+
       .heart {
-        color: red;
+        color: #ef4444;
+      }
+
+      @media (max-width: 500px) {
+        .card {
+          padding: 22px;
+        }
+
+        h1 {
+          font-size: 1.7rem;
+        }
+
+        .buttons {
+          flex-direction: column;
+        }
       }
     </style>
   </head>
+
   <body>
     <div class="card">
-      <h1>Text to Speech</h1>
-      <p>Type your text and click Speak.</p>
+      <div class="logo">🎙️</div>
 
-      <textarea id="text" placeholder="Type something here..."></textarea>
+      <h1>VoiceFlow</h1>
 
-      <br />
+      <p class="subtitle">
+        Convert your text into natural speech with multiple voices.
+      </p>
 
-      <select id="voiceSelect">
-        <option value="">Default Voice</option>
-      </select>
+      <textarea
+        id="text"
+        placeholder="Type something here..."
+      ></textarea>
 
-      <br />
+      <div class="controls">
+        <select id="voiceSelect">
+          <option value="">Select Voice</option>
+        </select>
 
-      <button id="speakBtn">Speak</button>
+        <div class="range-box">
+          Speech Speed:
+          <span id="speedValue">1</span>
+        </div>
+
+        <input
+          type="range"
+          id="speed"
+          min="0.5"
+          max="2"
+          step="0.1"
+          value="1"
+        />
+      </div>
+
+      <div class="buttons">
+        <button id="speakBtn">Speak</button>
+        <button id="stopBtn">Stop</button>
+      </div>
 
       <p id="msg"></p>
 
-      <!-- Your name with a heart ❤️ -->
-      <p class="byline">Made with <span class="heart">❤️</span> by Dhanya Akshaya</p>
+      <div class="footer">
+        Made with <span class="heart">❤️</span> by Dhanya Akshaya
+      </div>
     </div>
 
     <script>
       const textArea = document.getElementById("text");
       const speakBtn = document.getElementById("speakBtn");
+      const stopBtn = document.getElementById("stopBtn");
       const msg = document.getElementById("msg");
       const voiceSelect = document.getElementById("voiceSelect");
+      const speed = document.getElementById("speed");
+      const speedValue = document.getElementById("speedValue");
 
       let voices = [];
 
+      // Load voices
       function loadVoices() {
-        voices = window.speechSynthesis.getVoices();
-        voiceSelect.innerHTML = '<option value="">Default Voice</option>';
+        voices = speechSynthesis.getVoices();
+
+        voiceSelect.innerHTML =
+          '<option value="">Select Voice</option>';
+
         voices.forEach((voice, index) => {
           const option = document.createElement("option");
+
           option.value = index;
-          option.textContent = voice.name + " (" + voice.lang + ")";
+          option.textContent = `${voice.name} (${voice.lang})`;
+
           voiceSelect.appendChild(option);
         });
       }
 
       loadVoices();
-      window.speechSynthesis.onvoiceschanged = loadVoices;
 
+      speechSynthesis.onvoiceschanged = loadVoices;
+
+      // Speed display
+      speed.addEventListener("input", () => {
+        speedValue.textContent = speed.value;
+      });
+
+      // Speak
       speakBtn.addEventListener("click", () => {
         const text = textArea.value.trim();
 
         if (!("speechSynthesis" in window)) {
-          msg.textContent = "Sorry, your browser does not support speech.";
+          msg.textContent =
+            "Speech synthesis is not supported in this browser.";
           return;
         }
 
-        if (!text) {
-          msg.textContent = "Please type some text.";
+        if (text === "") {
+          msg.textContent = "Please enter some text.";
           return;
         }
 
         const utterance = new SpeechSynthesisUtterance(text);
 
-        const selectedIndex = voiceSelect.value;
-        if (selectedIndex !== "") {
-          utterance.voice = voices[selectedIndex];
+        const selectedVoice = voiceSelect.value;
+
+        if (selectedVoice !== "") {
+          utterance.voice = voices[selectedVoice];
         }
 
+        utterance.rate = speed.value;
+
         msg.textContent = "Speaking...";
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
+
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
 
         utterance.onend = () => {
-          msg.textContent = "Done!";
+          msg.textContent = "Finished speaking.";
         };
+      });
+
+      // Stop speech
+      stopBtn.addEventListener("click", () => {
+        speechSynthesis.cancel();
+        msg.textContent = "Speech stopped.";
       });
     </script>
   </body>
