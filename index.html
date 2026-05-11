@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VoiceFlow AI Translator</title>
+    <title>VoiceFlow | Text to Speech</title>
 
     <!-- Google Font -->
     <link
@@ -35,6 +35,7 @@
         overflow: hidden;
       }
 
+      /* Background Glow */
       body::before,
       body::after {
         content: "";
@@ -60,7 +61,7 @@
 
       .card {
         width: 100%;
-        max-width: 500px;
+        max-width: 460px;
         background: rgba(255, 255, 255, 0.12);
         backdrop-filter: blur(18px);
         border: 1px solid rgba(255, 255, 255, 0.15);
@@ -83,15 +84,15 @@
       }
 
       .logo {
-        width: 75px;
-        height: 75px;
+        width: 70px;
+        height: 70px;
         margin: auto;
         border-radius: 50%;
         background: linear-gradient(135deg, #06b6d4, #7c3aed);
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 30px;
+        font-size: 28px;
         margin-bottom: 18px;
         box-shadow: 0 0 25px rgba(124, 58, 237, 0.5);
       }
@@ -155,20 +156,10 @@
         font-size: 14px;
       }
 
-      .translated-box {
-        margin-top: 18px;
-        padding: 14px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.1);
-        min-height: 70px;
-        color: #f3f4f6;
-        font-size: 14px;
-      }
-
       .buttons {
         display: flex;
         gap: 12px;
-        margin-top: 15px;
+        margin-top: 10px;
       }
 
       button {
@@ -182,7 +173,7 @@
         transition: 0.3s ease;
       }
 
-      #translateBtn {
+      #speakBtn {
         background: linear-gradient(135deg, #06b6d4, #7c3aed);
         color: white;
       }
@@ -235,25 +226,20 @@
     <div class="card">
       <div class="logo">🎙️</div>
 
-      <h1>VoiceFlow AI</h1>
+      <h1>VoiceFlow</h1>
 
       <p class="subtitle">
-        Translate text into different languages and hear natural speech.
+        Convert your text into natural speech with multiple voices.
       </p>
 
       <textarea
         id="text"
-        placeholder="Type your text here..."
+        placeholder="Type something here..."
       ></textarea>
 
       <div class="controls">
-        <select id="languageSelect">
-          <option value="te">Telugu</option>
-          <option value="hi">Hindi</option>
-          <option value="fr">French</option>
-          <option value="es">Spanish</option>
-          <option value="de">German</option>
-          <option value="ja">Japanese</option>
+        <select id="voiceSelect">
+          <option value="">Select Voice</option>
         </select>
 
         <div class="range-box">
@@ -271,12 +257,8 @@
         />
       </div>
 
-      <div class="translated-box" id="translatedText">
-        Translated text will appear here...
-      </div>
-
       <div class="buttons">
-        <button id="translateBtn">Translate & Speak</button>
+        <button id="speakBtn">Speak</button>
         <button id="stopBtn">Stop</button>
       </div>
 
@@ -289,75 +271,74 @@
 
     <script>
       const textArea = document.getElementById("text");
-      const translateBtn = document.getElementById("translateBtn");
+      const speakBtn = document.getElementById("speakBtn");
       const stopBtn = document.getElementById("stopBtn");
-      const translatedText = document.getElementById("translatedText");
-      const languageSelect = document.getElementById("languageSelect");
       const msg = document.getElementById("msg");
+      const voiceSelect = document.getElementById("voiceSelect");
       const speed = document.getElementById("speed");
       const speedValue = document.getElementById("speedValue");
 
-      // Speed Display
+      let voices = [];
+
+      // Load voices
+      function loadVoices() {
+        voices = speechSynthesis.getVoices();
+
+        voiceSelect.innerHTML =
+          '<option value="">Select Voice</option>';
+
+        voices.forEach((voice, index) => {
+          const option = document.createElement("option");
+
+          option.value = index;
+          option.textContent = `${voice.name} (${voice.lang})`;
+
+          voiceSelect.appendChild(option);
+        });
+      }
+
+      loadVoices();
+
+      speechSynthesis.onvoiceschanged = loadVoices;
+
+      // Speed display
       speed.addEventListener("input", () => {
         speedValue.textContent = speed.value;
       });
 
-      // Translate and Speak
-      translateBtn.addEventListener("click", async () => {
+      // Speak
+      speakBtn.addEventListener("click", () => {
         const text = textArea.value.trim();
+
+        if (!("speechSynthesis" in window)) {
+          msg.textContent =
+            "Speech synthesis is not supported in this browser.";
+          return;
+        }
 
         if (text === "") {
           msg.textContent = "Please enter some text.";
           return;
         }
 
-        const targetLang = languageSelect.value;
+        const utterance = new SpeechSynthesisUtterance(text);
 
-        msg.textContent = "Translating...";
+        const selectedVoice = voiceSelect.value;
 
-        try {
-          // LibreTranslate API
-          const response = await fetch(
-            "https://libretranslate.de/translate",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                q: text,
-                source: "en",
-                target: targetLang,
-                format: "text",
-              }),
-            }
-          );
-
-          const data = await response.json();
-
-          const translated = data.translatedText;
-
-          translatedText.textContent = translated;
-
-          msg.textContent = "Speaking translated text...";
-
-          // Speak translated text
-          const utterance = new SpeechSynthesisUtterance(translated);
-
-          utterance.rate = speed.value;
-          utterance.lang = targetLang;
-
-          speechSynthesis.cancel();
-          speechSynthesis.speak(utterance);
-
-          utterance.onend = () => {
-            msg.textContent = "Finished speaking.";
-          };
-        } catch (error) {
-          console.log(error);
-          msg.textContent =
-            "Translation failed. Please try again later.";
+        if (selectedVoice !== "") {
+          utterance.voice = voices[selectedVoice];
         }
+
+        utterance.rate = speed.value;
+
+        msg.textContent = "Speaking...";
+
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+
+        utterance.onend = () => {
+          msg.textContent = "Finished speaking.";
+        };
       });
 
       // Stop speech
